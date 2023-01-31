@@ -4,6 +4,7 @@
 typedef struct Transacao
 {
     Operacao *listaOperacoes;
+    unsigned int tamanho;
 } Transacao;
 
 Transacao *criarTrasicao();

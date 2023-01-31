@@ -5,10 +5,11 @@
 
 typedef struct ListaEscalonamento
 {
-    Escalonamento *escalonamento;
+    Escalonamento **escalonamento;
+    unsigned int tamanho;
 } ListaEscalonamento;
 
-ListaEscalonamento *criarListaEscalonamento(ListaEscalonamento *lista, ListaTransacao *listaTransacao);
+ListaEscalonamento *criarListaEscalonamento(ListaTransacao *listaTransacao);
 void imprimirListaEscalonamento(ListaEscalonamento *lista);
 // void adicionarListaEscalonamento(ListaEscalonamento *lista, Escalonamento *escalonamento);
 void destruirListaEscalonamento(ListaEscalonamento *lista);

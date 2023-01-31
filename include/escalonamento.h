@@ -5,7 +5,8 @@
 
 typedef struct Escalonamento
 {
-    unsigned int **grafoTransacoes; // matriz de adjacência
+    unsigned int *grafoTransacoes; // matriz de adjacência
+    unsigned int quantidadeTransacoes;
 } Escalonamento;
 
 Escalonamento *criarEscalonamento();
@@ -13,5 +14,7 @@ Escalonamento *criarEscalonamento();
 // Tenta adicionar uma transação ao escalonamento.
 // Retorna true se a transação foi adicionada com sucesso, false caso contrário.
 bool adicionarTransacao(Escalonamento *escalonamento, Transacao *transacao);
+
+void imprimirEscalonamento(Escalonamento *escalonamento);
 
 void destruirEscalonamento(Escalonamento *escalonamento);
