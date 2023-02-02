@@ -1,10 +1,12 @@
 #include "transacao.h"
 #include <stdlib.h>
 
-Transacao *criarTrasicao()
+Transacao *criarTrasicao(unsigned int id)
 {
     Transacao *transacao = (Transacao *)malloc(sizeof(Transacao));
     transacao->listaOperacoes = NULL;
+    transacao->tamanho = 0;
+    transacao->id = id;
     return transacao;
 }
 
