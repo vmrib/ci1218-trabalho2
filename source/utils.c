@@ -29,19 +29,20 @@ ListaTransacao lerEntrada(){
     v[0] = *transacao;
     int tam_v = 1;
     // Operações são adicionadas às suas respectivas transações
-    for(int i = 0;i < tam;i++){
+    for(int i = 1;i < tam;i++){
         if((v[i].id == operacao[i].idTransacao)){
-            adicionarOperacao(transacao, &operacao[i]);
+            adicionarOperacao(&v[(v[i].id) - 1], &operacao[i]);
         }
         else{
             tam_v++;
             v = realloc(v, tam_v * sizeof(Transacao));
-            Transacao *novaTransacao = criarTrasicao(operacao[i].idTransacao);
-            adicionarOperacao(novaTransacao, &operacao[i]);
-            v[tam_v-1] = *novaTransacao;
+            //Transacao *novaTransacao = criarTrasicao(operacao[i].idTransacao);
+            v[tam_v-1] = *(criarTrasicao(operacao[i].idTransacao));
+            adicionarOperacao(&v[(v[i].id) - 1], &operacao[i]);
+            //free(novaTransacao);
         }
     }
-
+    printf("numero transacoes: %d \n", tam_v);
     // Adiciona transações do vetor à lista
     int trans_anterior = 0;
     for(int i = 0;i < tam_v;i++){
