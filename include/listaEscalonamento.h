@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Escalonamento.h"
+#include "escalonamento.h"
 #include "listaTransacao.h"
 
 typedef struct ListaEscalonamento

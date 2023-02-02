@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "escalonamento.h": "c",
+        "listatransacao.h": "c"
+    }
+}

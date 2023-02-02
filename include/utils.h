@@ -1,5 +1,5 @@
 #pragma once
 
-#include "ListaTransacao.h"
+#include "listaTransacao.h"
 
 ListaTransacao lerEntrada();
