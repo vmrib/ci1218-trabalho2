@@ -9,6 +9,7 @@ ListaTransacao lerEntrada(){
     int tam = 0;
     int tempo_chegada, id_transacao;
     char op, atributo;
+    int maior_id = 0;
     // É criada lista de operações
     while (scanf("%d %d %c %c", &tempo_chegada, &id_transacao, &op, &atributo) != EOF){
         tam++;
@@ -17,39 +18,28 @@ ListaTransacao lerEntrada(){
             printf("Erro ao alocar memoria");
             exit(1);
         }
+        if(id_transacao > maior_id)
+            maior_id = id_transacao;
         operacao[tam-1].tempoChegada = tempo_chegada;
         operacao[tam-1].idTransacao = id_transacao;
         operacao[tam-1].operacao = op;
         operacao[tam-1].atributo = atributo;
     }
-
+    
     Transacao *transacao = criarTrasicao(1);
-    Transacao *v = malloc(sizeof(transacao));
-    adicionarOperacao(transacao, &operacao[0]);
-    v[0] = *transacao;
-    int tam_v = 1;
-    // Operações são adicionadas às suas respectivas transações
-    for(int i = 1;i < tam;i++){
-        if((v[i].id == operacao[i].idTransacao)){
-            adicionarOperacao(&v[(v[i].id) - 1], &operacao[i]);
-        }
-        else{
-            tam_v++;
-            v = realloc(v, tam_v * sizeof(Transacao));
-            //Transacao *novaTransacao = criarTrasicao(operacao[i].idTransacao);
-            v[tam_v-1] = *(criarTrasicao(operacao[i].idTransacao));
-            adicionarOperacao(&v[(v[i].id) - 1], &operacao[i]);
-            //free(novaTransacao);
-        }
-    }
-    printf("numero transacoes: %d \n", tam_v);
-    // Adiciona transações do vetor à lista
-    int trans_anterior = 0;
+    Transacao *v = malloc(maior_id * sizeof(transacao));
+    int tam_v = maior_id;
+    // É criada uma transação para cada posição no vetor
     for(int i = 0;i < tam_v;i++){
-        if(v[i].id != trans_anterior){
-            adicionarListaTransacao(listaTransacao, &v[i]);
-            trans_anterior = v[i].id;
-        }
+        v[i] = *criarTrasicao(i+1);
+    }
+    // Operações são adicionadas às suas respectivas transações
+    for(int i = 0;i < tam;i++){
+        adicionarOperacao(&v[operacao[i].idTransacao-1], &operacao[i]);
+    }
+    // Transações são adicionadas à lista de transações
+    for(int i = 0;i < tam_v;i++){
+        adicionarListaTransacao(listaTransacao, &v[i]);
     }
 
     for(int i = 0 ; i < tam_v ; i++){
@@ -62,11 +52,5 @@ ListaTransacao lerEntrada(){
         }
     }
 
-
-
-
-
     return *listaTransacao;
-
-
 }
