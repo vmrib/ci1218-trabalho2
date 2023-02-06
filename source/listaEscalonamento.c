@@ -5,8 +5,8 @@
 ListaEscalonamento *criarListaEscalonamento(ListaTransacao *listaTransacao)
 {
     ListaEscalonamento *listaEsc = (ListaEscalonamento *)malloc(sizeof(ListaEscalonamento));
-    listaEsc->escalonamento = (Escalonamento **)malloc(sizeof(Escalonamento *));
-    listaEsc->escalonamento[0] = criarEscalonamento();
+    listaEsc->escalonamentos = (Escalonamento **)malloc(sizeof(Escalonamento *));
+    listaEsc->escalonamentos[0] = criarEscalonamento();
     listaEsc->tamanho = 1;
 
     for (int i = 0; i < listaTransacao->tamanho; i++)
@@ -14,7 +14,7 @@ ListaEscalonamento *criarListaEscalonamento(ListaTransacao *listaTransacao)
         bool adicionou = false;
         for (int j = 0; j < listaEsc->tamanho; j++)
         {
-            if (adicionarTransacao(listaEsc->escalonamento[j], &listaTransacao->transacao[i]))
+            if (adicionarTransacao(listaEsc->escalonamentos[j], &listaTransacao->transacao[i]))
             {
                 adicionou = true;
                 break;
@@ -23,9 +23,9 @@ ListaEscalonamento *criarListaEscalonamento(ListaTransacao *listaTransacao)
 
         if (!adicionou)
         {
-            listaEsc->escalonamento = realloc(listaEsc->escalonamento, (listaEsc->tamanho + 1) * sizeof(Escalonamento *));
-            listaEsc->escalonamento[listaEsc->tamanho] = criarEscalonamento();
-            adicionarTransacao(listaEsc->escalonamento[listaEsc->tamanho], &listaTransacao->transacao[i]);
+            listaEsc->escalonamentos = realloc(listaEsc->escalonamentos, (listaEsc->tamanho + 1) * sizeof(Escalonamento *));
+            listaEsc->escalonamentos[listaEsc->tamanho] = criarEscalonamento();
+            adicionarTransacao(listaEsc->escalonamentos[listaEsc->tamanho], &listaTransacao->transacao[i]);
             listaEsc->tamanho++;
         }
     }
@@ -38,7 +38,7 @@ void imprimirListaEscalonamento(ListaEscalonamento *lista)
     for (int i = 0; i < lista->tamanho; i++)
     {
         printf("%d ", i);
-        imprimirEscalonamento(lista->escalonamento[i]);
+        imprimirEscalonamento(lista->escalonamentos[i]);
     }
 }
 
@@ -46,9 +46,9 @@ void destruirListaEscalonamento(ListaEscalonamento *lista)
 {
     for (int i = 0; i < lista->tamanho; i++)
     {
-        destruirEscalonamento(lista->escalonamento[i]);
+        destruirEscalonamento(lista->escalonamentos[i]);
     }
 
-    free(lista->escalonamento);
+    free(lista->escalonamentos);
     free(lista);
 }

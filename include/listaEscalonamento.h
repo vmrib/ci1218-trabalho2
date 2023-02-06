@@ -5,7 +5,7 @@
 
 typedef struct ListaEscalonamento
 {
-    Escalonamento **escalonamento;
+    Escalonamento **escalonamentos;
     unsigned int tamanho;
 } ListaEscalonamento;
 

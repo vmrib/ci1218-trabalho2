@@ -9,6 +9,8 @@
 int main(void)
 {
     ListaTransacao listaTransacao = lerEntrada();
+    ListaEscalonamento *listaEscalonamento = criarListaEscalonamento(&listaTransacao);
+    imprimirListaEscalonamento(listaEscalonamento);
     printf("fim\n");
     return 0;
 }

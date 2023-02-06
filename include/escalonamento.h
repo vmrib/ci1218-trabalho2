@@ -2,11 +2,12 @@
 
 #include <stdbool.h>
 #include "transacao.h"
+#include "grafo.h"
 
 typedef struct Escalonamento
 {
-    unsigned int *grafoTransacoes; // matriz de adjacência
-    unsigned int quantidadeTransacoes;
+    Grafo *grafo;
+    Transacao **transacoes;
 } Escalonamento;
 
 Escalonamento *criarEscalonamento();
