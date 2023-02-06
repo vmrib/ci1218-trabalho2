@@ -43,7 +43,7 @@ bool adicionarTransacao(Escalonamento *escalonamento, Transacao *transacao)
         return false;
     }
 
-    return false;
+    return true;
 }
 
 void imprimirEscalonamento(Escalonamento *escalonamento)
@@ -68,7 +68,8 @@ static bool checarArestaSerialidade(Transacao *t1, Transacao *t2)
     {
         for (int j = 0; j < t2->tamanho; j++)
         {
-            if (t1->listaOperacoes[i].tempoChegada < t2->listaOperacoes[j].tempoChegada)
+            if (t1->listaOperacoes[i].tempoChegada < t2->listaOperacoes[j].tempoChegada &&
+                t1->listaOperacoes[i].atributo == t2->listaOperacoes[j].atributo)
             {
                 if ((t1->listaOperacoes[i].operacao == 'W' && t2->listaOperacoes[j].operacao == 'R') ||
                     (t1->listaOperacoes[i].operacao == 'R' && t2->listaOperacoes[j].operacao == 'W') ||

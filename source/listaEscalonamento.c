@@ -37,7 +37,7 @@ void imprimirListaEscalonamento(ListaEscalonamento *lista)
 {
     for (int i = 0; i < lista->tamanho; i++)
     {
-        printf("%d ", i);
+        printf("%d ", i + 1);
         imprimirEscalonamento(lista->escalonamentos[i]);
     }
 }

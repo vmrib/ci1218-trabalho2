@@ -27,6 +27,7 @@ void removerVertice(Grafo *g, unsigned int v)
         g->adj[v * g->v + i] = 0;
         g->adj[i * g->v + v] = 0;
     }
+    g->v--;
 }
 
 void inserirAresta(Grafo *g, unsigned int v1, unsigned int v2)

@@ -13,6 +13,7 @@ void adicionarListaTransacao(ListaTransacao *lista, Transacao *transacao)
 {
     lista->transacao = realloc(lista->transacao, (lista->tamanho + 1) * sizeof(Transacao));
     lista->transacao[lista->tamanho] = *transacao;
+    lista->tamanho++;
 }
 
 void destruirListaTransacao(ListaTransacao *lista)
