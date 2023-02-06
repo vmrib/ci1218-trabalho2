@@ -22,7 +22,6 @@ Escalonamento *criarEscalonamento()
 // Retorna true se a transação foi adicionada com sucesso, false caso contrário.
 bool adicionarTransacao(Escalonamento *escalonamento, Transacao *transacao)
 {
-
     escalonamento->serializavelConflito = adicionarPorConflito(escalonamento, transacao);
 
     return escalonamento->serializavelConflito || escalonamento->serializavelVisao;
@@ -53,6 +52,7 @@ void imprimirEscalonamento(Escalonamento *escalonamento)
 void destruirEscalonamento(Escalonamento *escalonamento)
 {
     destruirGrafo(escalonamento->grafoConflito);
+    destruirGrafo(escalonamento->grafoVisao);
     free(escalonamento->transacoes);
     free(escalonamento);
 }
