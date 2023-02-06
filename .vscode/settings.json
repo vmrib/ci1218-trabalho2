@@ -5,14 +5,11 @@
     },
     "makefile.launchConfigurations": [
         {
-            "cwd": "c:\\Users\\vinic\\Documents\\UFPR\\BD\\ci1218-trabalho2",
-            "binaryPath": "c:\\Users\\vinic\\Documents\\UFPR\\BD\\ci1218-trabalho2\\escalona",
-            "binaryArgs": []
-        },
-        {
-            "cwd": "/mnt/c/Users/vinic/Documents/UFPR/BD/ci1218-trabalho2",
-            "binaryPath": "/mnt/c/Users/vinic/Documents/UFPR/BD/ci1218-trabalho2/escalona",
-            "binaryArgs": []
+            "cwd": "/home/vini/UFPR/BD/ci1218-trabalho2",
+            "binaryPath": "/home/vini/UFPR/BD/ci1218-trabalho2/escalona",
+            "binaryArgs": [
+                "< teste1.in"
+            ]
         }
     ],
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
