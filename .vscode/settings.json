@@ -2,5 +2,18 @@
     "files.associations": {
         "escalonamento.h": "c",
         "listatransacao.h": "c"
-    }
+    },
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "c:\\Users\\vinic\\Documents\\UFPR\\BD\\ci1218-trabalho2",
+            "binaryPath": "c:\\Users\\vinic\\Documents\\UFPR\\BD\\ci1218-trabalho2\\escalona",
+            "binaryArgs": []
+        },
+        {
+            "cwd": "/mnt/c/Users/vinic/Documents/UFPR/BD/ci1218-trabalho2",
+            "binaryPath": "/mnt/c/Users/vinic/Documents/UFPR/BD/ci1218-trabalho2/escalona",
+            "binaryArgs": []
+        }
+    ],
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }

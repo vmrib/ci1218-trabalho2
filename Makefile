@@ -1,5 +1,5 @@
 CC 			:= gcc
-CFLAGS 		:= -Wall
+CFLAGS 		:= -Wall -g
 LDFLAGS		:=
 RM			:= rm -rf
 
@@ -31,3 +31,6 @@ clean:
 
 purge:
 	$(RM) $(OBJECTS) $(BINARY) $(BUILDDIR)
+
+run: $(BINARY)
+	./$(BINARY) < teste1.in
