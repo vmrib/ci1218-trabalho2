@@ -2,14 +2,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static bool adicionarPorConflito(Escalonamento *escalonamento, Transacao *transacao);
 static bool checarArestaSerialidade(Transacao *t1, Transacao *t2);
 
 Escalonamento *criarEscalonamento()
 {
     Escalonamento *escalonamento = (Escalonamento *)malloc(sizeof(Escalonamento));
 
-    escalonamento->grafo = criarGrafo();
+    escalonamento->grafoConflito = criarGrafo();
+    escalonamento->grafoVisao = criarGrafo();
     escalonamento->transacoes = NULL;
+    escalonamento->serializavelConflito = false;
+    escalonamento->serializavelVisao = false;
 
     return escalonamento;
 }
@@ -18,46 +22,37 @@ Escalonamento *criarEscalonamento()
 // Retorna true se a transação foi adicionada com sucesso, false caso contrário.
 bool adicionarTransacao(Escalonamento *escalonamento, Transacao *transacao)
 {
-    inserirVertice(escalonamento->grafo);
-    escalonamento->transacoes = realloc(escalonamento->transacoes, escalonamento->grafo->v * sizeof(Transacao *));
-    escalonamento->transacoes[escalonamento->grafo->v - 1] = transacao;
 
-    for (int i = 0; i < escalonamento->grafo->v; i++)
-    {
-        for (int j = 0; j < escalonamento->grafo->v; j++)
-        {
-            if (i == j)
-                continue;
+    escalonamento->serializavelConflito = adicionarPorConflito(escalonamento, transacao);
 
-            if (checarArestaSerialidade(escalonamento->transacoes[i], escalonamento->transacoes[j]))
-            {
-                inserirAresta(escalonamento->grafo, i, j);
-            }
-        }
-    }
-
-    if (checarCicloGrafo(escalonamento->grafo))
-    {
-        removerVertice(escalonamento->grafo, escalonamento->grafo->v - 1);
-        escalonamento->transacoes = realloc(escalonamento->transacoes, escalonamento->grafo->v * sizeof(Transacao *));
-        return false;
-    }
-
-    return true;
+    return escalonamento->serializavelConflito || escalonamento->serializavelVisao;
 }
 
 void imprimirEscalonamento(Escalonamento *escalonamento)
 {
-    for (int i = 0; i < escalonamento->grafo->v; i++)
+    for (int i = 0; i < escalonamento->grafoConflito->v; i++)
     {
         printf("%d ", escalonamento->transacoes[i]->id);
     }
+
+    if (escalonamento->serializavelConflito)
+        printf("SS");
+    else
+        printf("NS");
+
+    printf(" ");
+
+    if (escalonamento->serializavelVisao)
+        printf("SV");
+    else
+        printf("NV");
+
     printf("\n");
 }
 
 void destruirEscalonamento(Escalonamento *escalonamento)
 {
-    destruirGrafo(escalonamento->grafo);
+    destruirGrafo(escalonamento->grafoConflito);
     free(escalonamento->transacoes);
     free(escalonamento);
 }
@@ -80,4 +75,34 @@ static bool checarArestaSerialidade(Transacao *t1, Transacao *t2)
     }
 
     return false;
+}
+
+static bool adicionarPorConflito(Escalonamento *escalonamento, Transacao *transacao)
+{
+    inserirVertice(escalonamento->grafoConflito);
+    escalonamento->transacoes = realloc(escalonamento->transacoes, escalonamento->grafoConflito->v * sizeof(Transacao *));
+    escalonamento->transacoes[escalonamento->grafoConflito->v - 1] = transacao;
+
+    for (int i = 0; i < escalonamento->grafoConflito->v; i++)
+    {
+        for (int j = 0; j < escalonamento->grafoConflito->v; j++)
+        {
+            if (i == j)
+                continue;
+
+            if (checarArestaSerialidade(escalonamento->transacoes[i], escalonamento->transacoes[j]))
+            {
+                inserirAresta(escalonamento->grafoConflito, i, j);
+            }
+        }
+    }
+
+    if (checarCicloGrafo(escalonamento->grafoConflito))
+    {
+        removerVertice(escalonamento->grafoConflito, escalonamento->grafoConflito->v - 1);
+        escalonamento->transacoes = realloc(escalonamento->transacoes, escalonamento->grafoConflito->v * sizeof(Transacao *));
+        return false;
+    }
+
+    return true;
 }
