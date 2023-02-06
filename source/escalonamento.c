@@ -3,7 +3,6 @@
 #include <stdlib.h>
 
 static bool checarArestaSerialidade(Transacao *t1, Transacao *t2);
-static bool checarCicloGrafo(Grafo *grafo);
 
 Escalonamento *criarEscalonamento()
 {
@@ -80,9 +79,4 @@ static bool checarArestaSerialidade(Transacao *t1, Transacao *t2)
     }
 
     return false;
-}
-
-static bool checarCicloGrafo(Grafo *grafo)
-{
-    return true;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 typedef struct grafo
 {
     unsigned int v;    // numero de vertices
@@ -13,6 +15,8 @@ void removerVertice(Grafo *g, unsigned int v);
 
 void inserirAresta(Grafo *g, unsigned int v1, unsigned int v2);
 void removerAresta(Grafo *g, unsigned int v1, unsigned int v2);
+
+bool checarCicloGrafo(Grafo *grafo);
 
 void imprimirGrafo(Grafo *g);
 
