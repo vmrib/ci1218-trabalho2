@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-ListaTransacao lerEntrada(){
-    ListaTransacao *listaTransacao = criarListaTransacao();
+Operacao* lerEntrada(int *tamVetor){
     Operacao *operacao = NULL;
     int tam = 0;
     int tempo_chegada, id_transacao;
@@ -25,7 +24,18 @@ ListaTransacao lerEntrada(){
         operacao[tam-1].operacao = op;
         operacao[tam-1].atributo = atributo;
     }
-    
+    *tamVetor = tam;
+
+    return operacao;
+}
+
+ListaTransacao operacaoParaTransacao(Operacao* operacao, int tam){
+    int maior_id = 0;
+    for(int i = 0;i < tam;i++)
+        if(operacao[i].idTransacao > maior_id)
+            maior_id = operacao[i].idTransacao;
+
+    ListaTransacao *listaTransacao = criarListaTransacao();
     Transacao *transacao = criarTrasicao(1);
     Transacao *v = malloc(maior_id * sizeof(transacao));
     int tam_v = maior_id;

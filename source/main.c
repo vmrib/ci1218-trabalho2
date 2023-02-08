@@ -8,9 +8,12 @@
 
 int main(void)
 {
-    ListaTransacao listaTransacao = lerEntrada();
-    ListaEscalonamento *listaEscalonamento = criarListaEscalonamento(&listaTransacao);
-    imprimirListaEscalonamento(listaEscalonamento);
+    int tam = 0;
+    ListaTransacao listaTransacao;
+    Operacao* operacao = lerEntrada(&tam);
+    listaTransacao = operacaoParaTransacao(operacao, tam);
+    //ListaEscalonamento *listaEscalonamento = criarListaEscalonamento(&listaTransacao);
+    //imprimirListaEscalonamento(listaEscalonamento);
     printf("fim\n");
     return 0;
 }
