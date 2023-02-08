@@ -16,6 +16,8 @@ static bool inserirArestasWWVisao(Grafo *grafo, ListaOperacao *operacoes);
 static void inserirArestasWRVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo);
 static bool inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo);
 
+static void ordenarListaOperacoes(ListaOperacao *lista);
+
 Escalonamento *criarEscalonamento()
 {
     Escalonamento *escalonamento = (Escalonamento *)malloc(sizeof(Escalonamento));
@@ -40,6 +42,7 @@ Escalonamento *criarEscalonamento()
 bool adicionarTransacao(Escalonamento *escalonamento, Transacao *transacao)
 {
     escalonamento->serializavelVisao = adicionarPorVisao(escalonamento, transacao);
+    // escalonamento->serializavelVisao = false;
     escalonamento->serializavelConflito = adicionarPorConflito(escalonamento, transacao);
 
     return escalonamento->serializavelConflito || escalonamento->serializavelVisao;
@@ -157,6 +160,8 @@ static ListaOperacao *recriarListaOperacoes(Transacao **transacoes, unsigned int
         }
     }
 
+    ordenarListaOperacoes(operacoes);
+
     return operacoes;
 }
 
@@ -173,7 +178,7 @@ static void inserirArestasWRVisao(Grafo *grafo, ListaOperacao *operacoes)
 
         for (int j = 0; j < totalAtributos; j++)
         {
-            if (operacoes->listaOperacoes[i].atributo == atributos[j])
+            if (operacoes->listaOperacoes[i].atributo == atributos[j] || operacoes->listaOperacoes[i].atributo == '-')
             {
                 existe = true;
                 break;
@@ -212,7 +217,7 @@ static void inserirArestasWRVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes
         if (operacaoAtual->atributo != atributo)
             continue;
 
-        if (operacaoAtual->operacao == 'R')
+        if (operacaoAtual->operacao == 'R' && Ti != Tj)
             inserirAresta(grafo, Ti, Tj);
 
         else if (operacaoAtual->operacao == 'W')
@@ -288,7 +293,7 @@ static bool inserirArestasWWVisao(Grafo *grafo, ListaOperacao *operacoes)
 
         for (int j = 0; j < totalAtributos; j++)
         {
-            if (operacoes->listaOperacoes[i].atributo == atributos[j])
+            if (operacoes->listaOperacoes[i].atributo == atributos[j] || operacoes->listaOperacoes[i].atributo == '-')
             {
                 existe = true;
                 break;
@@ -347,7 +352,7 @@ static bool inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes
                 if (operacaoAtual3->atributo != atributo)
                     continue;
 
-                if (operacaoAtual3->operacao == 'R')
+                if (operacaoAtual3->operacao == 'R' && (Tk != Ti || Tk != Tj))
                 {
                     inserirAresta(grafo, Tk, Ti);
                     if (checarCicloGrafo(grafo))
@@ -371,4 +376,14 @@ static bool inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes
     }
 
     return true;
+}
+
+static int comparar(const void *a, const void *b)
+{
+    return ((Operacao *)a)->tempoChegada - ((Operacao *)b)->tempoChegada;
+}
+
+static void ordenarListaOperacoes(ListaOperacao *lista)
+{
+    qsort(lista->listaOperacoes, lista->tamanho, sizeof(Operacao), comparar);
 }
