@@ -223,61 +223,6 @@ static void inserirArestasWRVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes
         else if (operacaoAtual->operacao == 'W')
             Ti = Tj;
     }
-
-    // considerando todos os writes
-    // enquanto nao houver escrita do atributo, cria aresta T0 -> Tx
-    /*
-    int i = 0;
-    for (; i < operacoes->tamanho; i++)
-    {
-        Operacao *operacaoAtual = &operacoes->listaOperacoes[i];
-        unsigned int Tatual = operacaoAtual->transacao + 1;
-
-        if (operacaoAtual->atributo != atributo)
-            continue;
-
-        if (operacaoAtual->operacao == 'R')
-            inserirAresta(grafo, 0, Tatual);
-        else
-            break;
-    }
-
-    // Passo 2 algoritmo
-    for (; operacoes->tamanho; i++)
-    {
-        if (operacoes->listaOperacoes[i].atributo != atributo)
-            continue;
-
-        if (operacoes->listaOperacoes[i].operacao == 'W')
-        {
-            for (int j = i + 1; j < operacoes->tamanho; j++)
-            {
-                if (operacoes->listaOperacoes[j].atributo != atributo)
-                    continue;
-
-                if (operacoes->listaOperacoes[j].operacao == 'R')
-                {
-                    unsigned int Ti = operacoes->listaOperacoes[i].transacao + 1;
-                    unsigned int Tj = operacoes->listaOperacoes[j].transacao + 1;
-                    inserirAresta(grafo, Ti, Tj);
-                }
-            }
-        }
-    }
-
-    // Cria aresta da transacao que fez a ultima escrita para Tf
-    for (i = operacoes->tamanho - 1; i >= 0; i--)
-    {
-        if (operacoes->listaOperacoes[i].atributo != atributo)
-            continue;
-
-        if (operacoes->listaOperacoes[i].operacao == 'W')
-        {
-            unsigned int Ti = operacoes->listaOperacoes[i].transacao + 1;
-            inserirAresta(grafo, Ti, 1);
-            break;
-        }
-    } */
 }
 
 // Passo 3
