@@ -8,7 +8,8 @@ typedef struct Escalonamento
 {
     Grafo *grafoConflito;
     Grafo *grafoVisao;
-    Transacao **transacoes;
+    Transacao **transacoesConflito;
+    Transacao **transacoesVisao;
     bool serializavelConflito;
     bool serializavelVisao;
 } Escalonamento;
