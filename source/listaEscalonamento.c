@@ -2,12 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-ListaEscalonamento *criarListaEscalonamento(ListaTransacao *listaTransacao)
+ListaEscalonamento *criarListaEscalonamento(Operacao *listaOperacao, int tamanho)
 {
     ListaEscalonamento *listaEsc = (ListaEscalonamento *)malloc(sizeof(ListaEscalonamento));
     listaEsc->escalonamentos = (Escalonamento **)malloc(sizeof(Escalonamento *));
     listaEsc->escalonamentos[0] = criarEscalonamento();
     listaEsc->tamanho = 1;
+
+    ListaTransacao *listaTransacao = operacaoParaTransacao(listaOperacao, tamanho);
 
     for (int i = 0; i < listaTransacao->tamanho; i++)
     {

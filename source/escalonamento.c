@@ -200,14 +200,6 @@ static void inserirArestasWRVisao(Grafo *grafo, ListaOperacao *operacoes)
 // Passo 1 e 2 (considerando soh um atributo)
 static void inserirArestasWRVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo)
 {
-
-    /** DUVIDA IMPORTANTE: CONSIDERAR O WRITE MAIS RECENTE OU TODOS OS WRITES? */
-    /** Depois de pensar um pouco cheguei a conclusao que eh o write mais recente.
-     *  Se nao for esse algoritmo por visao eh todo cagado por natureza.
-     *
-     */
-
-    // considerando soh write recente
     unsigned int Ti = 0;
     for (int i = 0; i < operacoes->tamanho; i++)
     {
@@ -263,64 +255,73 @@ static bool inserirArestasWWVisao(Grafo *grafo, ListaOperacao *operacoes)
 // Passo 3 (copnsiderando um atributo)
 static bool inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo)
 {
-    // Considerando que o passo 1 e 2 eh com os writes mais recentes
-
-    // algoritmo ta extremamente lixoso, mas funciona (na teoria) (eu acho)
-
-    // TODO: eliminar o for do meio, e fazer o primeiro for pegar o write mais recente
-    // prototipo:
-    // 1. encontra primeiro write, depois segundo (no mesmo loop)
-    // 2. pra cada read depois faz o passo 3 tlg
-    // 3. seta primeiro write = segundo e repete passo 1.
+    // linha da pilha x qual aresta x qual vertice da aresta
+    unsigned int pilha[operacoes->tamanho * 2][2][2];
+    unsigned int topo = 0;
+    unsigned int W1 = 0;
+    int k = 0;
 
     for (int i = 0; i < operacoes->tamanho; i++)
     {
         Operacao *operacaoAtual = &operacoes->listaOperacoes[i];
-        unsigned int Tk = operacaoAtual->idTransacao + 1;
+        unsigned int W2 = operacaoAtual->idTransacao + 1;
 
-        if (operacaoAtual->atributo != atributo || operacaoAtual->operacao != 'W')
+        if (operacaoAtual->atributo != atributo)
             continue;
 
-        for (int j = i + 1; j < operacoes->tamanho; j++)
+        if (operacaoAtual->operacao == 'W')
         {
-            Operacao *operacaoAtual2 = &operacoes->listaOperacoes[j];
-            unsigned int Ti = operacaoAtual2->idTransacao + 1;
-
-            if (operacaoAtual2->atributo != atributo || operacaoAtual2->operacao != 'W')
-                continue;
-
-            for (int k = j + 1; k < operacoes->tamanho; k++)
+            for (int j = k; j < i; j++)
             {
-                Operacao *operacaoAtual3 = &operacoes->listaOperacoes[k];
-                unsigned int Tj = operacaoAtual3->idTransacao + 1;
+                unsigned int Tx = operacoes->listaOperacoes[j].idTransacao + 1;
 
-                if (operacaoAtual3->atributo != atributo)
+                if (operacoes->listaOperacoes[j].atributo != atributo)
                     continue;
 
-                if (operacaoAtual3->operacao == 'R' && (Tk != Ti || Tk != Tj))
+                if (operacoes->listaOperacoes[j].operacao == 'R')
                 {
-                    inserirAresta(grafo, Tk, Ti);
-                    if (checarCicloGrafo(grafo))
+                    if (W1 != Tx && W2 != Tx)
                     {
-                        removerAresta(grafo, Tk, Ti);
-                        inserirAresta(grafo, Tj, Tk);
+                        pilha[topo][0][0] = W2;
+                        pilha[topo][0][1] = W1;
+                        pilha[topo][1][0] = Tx;
+                        pilha[topo][1][1] = W2;
+                        topo++;
+                    }
+                }
+            }
 
-                        if (checarCicloGrafo(grafo))
-                        {
-                            removerAresta(grafo, Tj, Tk);
-                            return false;
-                        }
+            for (int j = i; j < operacoes->tamanho; j++)
+            {
+                unsigned int Tx = operacoes->listaOperacoes[j].idTransacao + 1;
+
+                if (operacoes->listaOperacoes[j].atributo != atributo)
+                    continue;
+
+                if (operacoes->listaOperacoes[j].operacao == 'R')
+                {
+                    if (W1 != Tx && W2 != Tx)
+                    {
+                        pilha[topo][0][0] = W1;
+                        pilha[topo][0][1] = W2;
+                        pilha[topo][1][0] = Tx;
+                        pilha[topo][1][1] = W1;
+                        topo++;
                     }
                 }
 
-                else if (operacaoAtual3->operacao == 'W')
+                else if (operacoes->listaOperacoes[j].operacao == 'W')
+                {
                     break;
+                }
             }
-            break;
+
+            W1 = W2;
+            k = i;
         }
     }
 
-    return true;
+    return encontrarCombinacaoArestasVisao(grafo, pilha, topo);
 }
 
 static int comparar(const void *a, const void *b)
