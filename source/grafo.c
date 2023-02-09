@@ -99,3 +99,14 @@ static bool checarCicloGrafoAux(Grafo *grafo, unsigned int v, bool visitados[], 
 
     return false;
 }
+
+void removerTodasArestas(Grafo *g)
+{
+    for (int i = 0; i < g->v; i++)
+    {
+        for (int j = 0; j < g->v; j++)
+        {
+            g->adj[i * g->v + j] = 0;
+        }
+    }
+}

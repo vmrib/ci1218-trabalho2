@@ -101,6 +101,7 @@ static bool checarArestaConflito(Transacao *t1, Transacao *t2)
 static bool adicionarPorConflito(Escalonamento *escalonamento, Transacao *transacao)
 {
     inserirVertice(escalonamento->grafoConflito);
+    removerTodasArestas(grafo);
     escalonamento->transacoesConflito = realloc(escalonamento->transacoesConflito, escalonamento->grafoConflito->v * sizeof(Transacao *));
     escalonamento->transacoesConflito[escalonamento->grafoConflito->v - 1] = transacao;
 
@@ -131,6 +132,7 @@ static bool adicionarPorConflito(Escalonamento *escalonamento, Transacao *transa
 static bool adicionarPorVisao(Escalonamento *escalonamento, Transacao *transacao)
 {
     inserirVertice(escalonamento->grafoVisao);
+    removerTodasArestas(grafo);
     unsigned int totalTransacoes = escalonamento->grafoVisao->v - 2; // ignora T0 e Tf
 
     escalonamento->transacoesVisao = realloc(escalonamento->transacoesVisao, totalTransacoes * sizeof(Transacao *));
@@ -252,11 +254,13 @@ static bool inserirArestasWWVisao(Grafo *grafo, ListaOperacao *operacoes)
     return true;
 }
 
+// Duas arestas x vertice por aresta
+typedef unsigned int PilhaAresta[2][2]
+
 // Passo 3 (copnsiderando um atributo)
 static bool inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo)
 {
-    // linha da pilha x qual aresta x qual vertice da aresta
-    unsigned int pilha[operacoes->tamanho * 2][2][2];
+    PilhaAresta pilha[operacoes->tamanho * 2];
     unsigned int topo = 0;
     unsigned int W1 = 0;
     int k = 0;
@@ -322,6 +326,31 @@ static bool inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes
     }
 
     return encontrarCombinacaoArestasVisao(grafo, pilha, topo);
+}
+
+static bool encontrarCombinacaoArestasVisao(Grafo *grafo, PilhaAresta pilha[], unsigned int topo)
+{
+
+    if (topo == 0)
+        return checarCicloGrafo(grafo);
+
+    topo--;
+    
+    inserirAresta(grafo, pilha[topo][0][0], pilha[topo][0][1]);
+
+    if(!encontrarCombinacaoArestasVisao(grafo, pilha, topo))
+    {
+        removerAresta(grafo, pilha[topo][0][0], pilha[topo][0][1]);
+        inserirAresta(grafo, pilha[topo][1][0], pilha[topo][1][1]);
+
+        if (!encontrarCombinacaoArestasVisao(grafo, pilha, topo))
+        {
+            removerAresta(grafo, pilha[topo][1][0], pilha[topo][1][1]);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 static int comparar(const void *a, const void *b)
