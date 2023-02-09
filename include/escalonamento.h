@@ -18,8 +18,8 @@ Escalonamento *criarEscalonamento();
 
 // Tenta adicionar uma transação ao escalonamento.
 // Retorna true se a transação foi adicionada com sucesso, false caso contrário.
-ListaEscalonamento *criarListaEscalonamento(Operacao *listaOperacao, int tamanho)
+bool adicionarTransacao(Escalonamento *escalonamento, Transacao *transacao);
 
-    void imprimirEscalonamento(Escalonamento *escalonamento);
+void imprimirEscalonamento(Escalonamento *escalonamento);
 
 void destruirEscalonamento(Escalonamento *escalonamento);

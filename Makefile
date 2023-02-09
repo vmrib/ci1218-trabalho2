@@ -1,5 +1,5 @@
 CC 			:= gcc
-CFLAGS 		:= -Wall -g
+CFLAGS 		:= -Wall -g -fmax-errors=1
 LDFLAGS		:=
 RM			:= rm -rf
 

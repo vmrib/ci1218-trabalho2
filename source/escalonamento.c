@@ -5,6 +5,9 @@
 #include "operacao.h"
 #include "listaOperacao.h"
 
+// Duas arestas x vertice por aresta
+typedef unsigned int PilhaAresta[2][2];
+
 static bool adicionarPorConflito(Escalonamento *escalonamento, Transacao *transacao);
 static bool adicionarPorVisao(Escalonamento *escalonamento, Transacao *transacao);
 
@@ -15,6 +18,8 @@ static void inserirArestasWRVisao(Grafo *grafo, ListaOperacao *operacoes);
 static bool inserirArestasWWVisao(Grafo *grafo, ListaOperacao *operacoes);
 static void inserirArestasWRVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo);
 static bool inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo);
+
+static bool encontrarCombinacaoArestasVisao(Grafo *grafo, PilhaAresta pilha[], unsigned int topo);
 
 static void ordenarListaOperacoes(ListaOperacao *lista);
 
@@ -101,7 +106,7 @@ static bool checarArestaConflito(Transacao *t1, Transacao *t2)
 static bool adicionarPorConflito(Escalonamento *escalonamento, Transacao *transacao)
 {
     inserirVertice(escalonamento->grafoConflito);
-    removerTodasArestas(grafo);
+    removerTodasArestas(escalonamento->grafoConflito);
     escalonamento->transacoesConflito = realloc(escalonamento->transacoesConflito, escalonamento->grafoConflito->v * sizeof(Transacao *));
     escalonamento->transacoesConflito[escalonamento->grafoConflito->v - 1] = transacao;
 
@@ -132,7 +137,7 @@ static bool adicionarPorConflito(Escalonamento *escalonamento, Transacao *transa
 static bool adicionarPorVisao(Escalonamento *escalonamento, Transacao *transacao)
 {
     inserirVertice(escalonamento->grafoVisao);
-    removerTodasArestas(grafo);
+    removerTodasArestas(escalonamento->grafoVisao);
     unsigned int totalTransacoes = escalonamento->grafoVisao->v - 2; // ignora T0 e Tf
 
     escalonamento->transacoesVisao = realloc(escalonamento->transacoesVisao, totalTransacoes * sizeof(Transacao *));
@@ -254,11 +259,9 @@ static bool inserirArestasWWVisao(Grafo *grafo, ListaOperacao *operacoes)
     return true;
 }
 
-// Duas arestas x vertice por aresta
-typedef unsigned int PilhaAresta[2][2]
-
 // Passo 3 (copnsiderando um atributo)
-static bool inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo)
+static bool
+inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo)
 {
     PilhaAresta pilha[operacoes->tamanho * 2];
     unsigned int topo = 0;
@@ -335,10 +338,10 @@ static bool encontrarCombinacaoArestasVisao(Grafo *grafo, PilhaAresta pilha[], u
         return checarCicloGrafo(grafo);
 
     topo--;
-    
+
     inserirAresta(grafo, pilha[topo][0][0], pilha[topo][0][1]);
 
-    if(!encontrarCombinacaoArestasVisao(grafo, pilha, topo))
+    if (!encontrarCombinacaoArestasVisao(grafo, pilha, topo))
     {
         removerAresta(grafo, pilha[topo][0][0], pilha[topo][0][1]);
         inserirAresta(grafo, pilha[topo][1][0], pilha[topo][1][1]);
