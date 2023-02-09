@@ -11,6 +11,11 @@
             "binaryArgs": [
                 "< teste1.in"
             ]
+        },
+        {
+            "cwd": "/home/bcc/vmr20/Documentos/BD/ci1218-trabalho2",
+            "binaryPath": "/home/bcc/vmr20/Documentos/BD/ci1218-trabalho2/escalona",
+            "binaryArgs": []
         }
     ],
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"

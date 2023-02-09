@@ -1,4 +1,5 @@
 #include "listaEscalonamento.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,7 +10,8 @@ ListaEscalonamento *criarListaEscalonamento(Operacao *listaOperacao, int tamanho
     listaEsc->escalonamentos[0] = criarEscalonamento();
     listaEsc->tamanho = 1;
 
-    ListaTransacao *listaTransacao = operacaoParaTransacao(listaOperacao, tamanho);
+    ListaTransacao listaTransacaoAux = operacaoParaTransacao(listaOperacao, tamanho);
+    ListaTransacao *listaTransacao = &listaTransacaoAux;
 
     for (int i = 0; i < listaTransacao->tamanho; i++)
     {
