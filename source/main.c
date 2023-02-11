@@ -5,11 +5,11 @@
 
 int main(void)
 {
-    ListaOperacao *operacao = lerEntrada();
-    ListaEscalonamento *listaEscalonamento = criarListaEscalonamento(operacao);
+    ListaOperacao *listaOperacoes = lerEntrada();
+    ListaEscalonamento *listaEscalonamento = criarListaEscalonamento(listaOperacoes);
     imprimirListaEscalonamento(listaEscalonamento);
 
-    destruirListaOperacao(operacao);
+    destruirListaOperacao(listaOperacoes);
     destruirListaEscalonamento(listaEscalonamento);
 
     return 0;

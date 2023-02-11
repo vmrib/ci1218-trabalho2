@@ -156,7 +156,7 @@ static bool checarArestaConflito(Transacao *t1, Transacao *t2)
     return false;
 }
 
-// Passo 1 e 2
+// Passo 1 e 2 da Serialização por Visão. W(x) -> R(x)
 static void inserirArestasWRVisao(Escalonamento *esc, ListaOperacao *operacoes)
 {
     char atributos[operacoes->tamanho];
@@ -167,7 +167,7 @@ static void inserirArestasWRVisao(Escalonamento *esc, ListaOperacao *operacoes)
         inserirArestasWRVisaoAtributo(esc, operacoes, atributos[i]);
 }
 
-// Passo 1 e 2 (considerando soh um atributo)
+// Passo 1 e 2 da Serialização por Visão. W(x) -> R(x) (considerando soh um atributo)
 static void inserirArestasWRVisaoAtributo(Escalonamento *esc, ListaOperacao *operacoes, char atributo)
 {
     unsigned int Ti = 0;
@@ -191,7 +191,7 @@ static void inserirArestasWRVisaoAtributo(Escalonamento *esc, ListaOperacao *ope
     inserirAresta(esc->grafoVisao, idTransacaoParaIdGrafoVisao(esc, Ti), 1);
 }
 
-// Passo 3
+// Passo 3 da Serialização por Visão. W(x) -> W(x)
 static bool inserirArestasWWVisao(Escalonamento *esc, ListaOperacao *operacoes)
 {
     char atributos[operacoes->tamanho];
@@ -205,7 +205,7 @@ static bool inserirArestasWWVisao(Escalonamento *esc, ListaOperacao *operacoes)
     return true;
 }
 
-// Passo 3 (considerando um atributo)
+// Passo 3 da Serialização por Visão. W(x) -> W(x) (considerando um atributo)
 static bool
 inserirArestasWWVisaoAtributo(Escalonamento *esc, ListaOperacao *operacoes, char atributo)
 {
@@ -309,6 +309,7 @@ static bool encontrarCombinacaoArestasVisao(Escalonamento *esc, PilhaAresta pilh
                   idTransacaoParaIdGrafoVisao(esc, Ti),
                   idTransacaoParaIdGrafoVisao(esc, Tj));
 
+    // se a aresta inserida formar um ciclo, entao a combinacao eh invalida
     if (Ti == Tf || Tj == T0 || !encontrarCombinacaoArestasVisao(esc, pilha, topo))
     {
         removerAresta(esc->grafoVisao,
@@ -317,6 +318,8 @@ static bool encontrarCombinacaoArestasVisao(Escalonamento *esc, PilhaAresta pilh
 
         Ti = pilha[topo][1][0];
         Tj = pilha[topo][1][1];
+
+        // inserimos a outra aresta do par
         inserirAresta(esc->grafoVisao,
                       idTransacaoParaIdGrafoVisao(esc, Ti),
                       idTransacaoParaIdGrafoVisao(esc, Tj));

@@ -12,6 +12,9 @@ ListaEscalonamento *criarListaEscalonamento(ListaOperacao *listaOperacao)
 
     ListaTransacao *listaTransacao = operacaoParaTransacao(listaOperacao);
 
+    // Para verificar se uma transação pode fazer parte de um escalonamento,
+    // verificamos se o início dessa transação precede o commit mais recente do
+    // escalonamento. Caso não seja possível, colocamos em outro escalonamento.
     for (int i = 0; i < listaTransacao->tamanho; i++)
     {
         bool adicionou = false;
