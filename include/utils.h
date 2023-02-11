@@ -1,8 +1,8 @@
 #pragma once
 
 #include "listaTransacao.h"
-#include "transacao.h"
 #include "operacao.h"
+#include "listaOperacao.h"
 
-Operacao* lerEntrada(int *tamVetor);
-ListaTransacao operacaoParaTransacao(Operacao* operacao, int tam);
+ListaOperacao *lerEntrada();
+ListaTransacao *operacaoParaTransacao(ListaOperacao *operacao);

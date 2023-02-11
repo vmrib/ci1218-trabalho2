@@ -3,22 +3,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-ListaEscalonamento *criarListaEscalonamento(Operacao *listaOperacao, int tamanho)
+ListaEscalonamento *criarListaEscalonamento(ListaOperacao *listaOperacao)
 {
     ListaEscalonamento *listaEsc = (ListaEscalonamento *)malloc(sizeof(ListaEscalonamento));
     listaEsc->escalonamentos = (Escalonamento **)malloc(sizeof(Escalonamento *));
     listaEsc->escalonamentos[0] = criarEscalonamento();
     listaEsc->tamanho = 1;
 
-    ListaTransacao listaTransacaoAux = operacaoParaTransacao(listaOperacao, tamanho);
-    ListaTransacao *listaTransacao = &listaTransacaoAux;
+    ListaTransacao *listaTransacao = operacaoParaTransacao(listaOperacao);
 
     for (int i = 0; i < listaTransacao->tamanho; i++)
     {
         bool adicionou = false;
         for (int j = 0; j < listaEsc->tamanho; j++)
         {
-            if (adicionarTransacao(listaEsc->escalonamentos[j], &listaTransacao->transacao[i]))
+            if (adicionarTransacao(listaEsc->escalonamentos[j], listaTransacao->transacao[i]))
             {
                 adicionou = true;
                 break;
@@ -29,30 +28,13 @@ ListaEscalonamento *criarListaEscalonamento(Operacao *listaOperacao, int tamanho
         {
             listaEsc->escalonamentos = realloc(listaEsc->escalonamentos, (listaEsc->tamanho + 1) * sizeof(Escalonamento *));
             listaEsc->escalonamentos[listaEsc->tamanho] = criarEscalonamento();
-            adicionarTransacao(listaEsc->escalonamentos[listaEsc->tamanho], &listaTransacao->transacao[i]);
+            adicionarTransacao(listaEsc->escalonamentos[listaEsc->tamanho], listaTransacao->transacao[i]);
             listaEsc->tamanho++;
         }
     }
 
     return listaEsc;
 }
-
-/* ListaEscalonamento *criarListaEscalonamento2(Operacao *listaOperacao, int tamanho)
-{
-    ListaEscalonamento *listaEsc = (ListaEscalonamento *)malloc(sizeof(ListaEscalonamento));
-    listaEsc->escalonamentos = (Escalonamento **)malloc(sizeof(Escalonamento *));
-    listaEsc->escalonamentos[0] = criarEscalonamento();
-    listaEsc->tamanho = 1;
-
-    ListaTransacao transacoesTotal = operacaoParaTransacao(listaOperacao, tamanho);
-
-
-
-    for (int i = 0; i < transacoesTotal.tamanho; i++)
-    {
-
-    }
-} */
 
 void imprimirListaEscalonamento(ListaEscalonamento *lista)
 {
@@ -66,9 +48,7 @@ void imprimirListaEscalonamento(ListaEscalonamento *lista)
 void destruirListaEscalonamento(ListaEscalonamento *lista)
 {
     for (int i = 0; i < lista->tamanho; i++)
-    {
         destruirEscalonamento(lista->escalonamentos[i]);
-    }
 
     free(lista->escalonamentos);
     free(lista);

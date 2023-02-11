@@ -1,13 +1,16 @@
 #include <stdio.h>
-#include "listaEscalonamento.h"
 #include "utils.h"
-#include "operacao.h"
+#include "listaOperacao.h"
+#include "listaEscalonamento.h"
 
 int main(void)
 {
-    int tam = 0;
-    Operacao *operacao = lerEntrada(&tam);
-    ListaEscalonamento *listaEscalonamento = criarListaEscalonamento(operacao, tam);
+    ListaOperacao *operacao = lerEntrada();
+    ListaEscalonamento *listaEscalonamento = criarListaEscalonamento(operacao);
     imprimirListaEscalonamento(listaEscalonamento);
+
+    destruirListaOperacao(operacao);
+    destruirListaEscalonamento(listaEscalonamento);
+
     return 0;
 }

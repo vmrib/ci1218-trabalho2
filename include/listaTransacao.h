@@ -4,7 +4,7 @@
 
 typedef struct ListaTransacao
 {
-    Transacao *transacao; // vetor de transacoes
+    Transacao **transacao; // vetor de transacoes
     unsigned int tamanho;
 } ListaTransacao;
 

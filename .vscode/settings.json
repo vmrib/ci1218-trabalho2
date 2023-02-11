@@ -2,7 +2,8 @@
     "files.associations": {
         "escalonamento.h": "c",
         "listatransacao.h": "c",
-        "operacao.h": "c"
+        "operacao.h": "c",
+        "stdlib.h": "c"
     },
     "makefile.launchConfigurations": [
         {

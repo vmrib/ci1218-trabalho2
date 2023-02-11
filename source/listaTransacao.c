@@ -11,17 +11,15 @@ ListaTransacao *criarListaTransacao()
 
 void adicionarListaTransacao(ListaTransacao *lista, Transacao *transacao)
 {
-    lista->transacao = realloc(lista->transacao, (lista->tamanho + 1) * sizeof(Transacao));
-    lista->transacao[lista->tamanho] = *transacao;
+    lista->transacao = realloc(lista->transacao, (lista->tamanho + 1) * sizeof(Transacao *));
+    lista->transacao[lista->tamanho] = transacao;
     lista->tamanho++;
 }
 
 void destruirListaTransacao(ListaTransacao *lista)
 {
-    for (int i = 0; i < lista->tamanho; i++)
-    {
-        destruirTransacao(&lista->transacao[i]);
-    }
+    for (unsigned int i = 0; i < lista->tamanho; i++)
+        destruirTransacao(lista->transacao[i]);
 
     free(lista->transacao);
     free(lista);
