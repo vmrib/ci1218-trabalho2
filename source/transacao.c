@@ -22,3 +22,13 @@ void destruirTransacao(Transacao *transacao)
     free(transacao->listaOperacoes);
     free(transacao);
 }
+
+unsigned int tempoCommit(Transacao *transacao)
+{
+    return transacao->listaOperacoes[transacao->tamanho - 1].tempoChegada;
+}
+
+unsigned int tempoInicio(Transacao *transacao)
+{
+    return transacao->listaOperacoes[0].tempoChegada;
+}

@@ -37,6 +37,23 @@ ListaEscalonamento *criarListaEscalonamento(Operacao *listaOperacao, int tamanho
     return listaEsc;
 }
 
+/* ListaEscalonamento *criarListaEscalonamento2(Operacao *listaOperacao, int tamanho)
+{
+    ListaEscalonamento *listaEsc = (ListaEscalonamento *)malloc(sizeof(ListaEscalonamento));
+    listaEsc->escalonamentos = (Escalonamento **)malloc(sizeof(Escalonamento *));
+    listaEsc->escalonamentos[0] = criarEscalonamento();
+    listaEsc->tamanho = 1;
+
+    ListaTransacao transacoesTotal = operacaoParaTransacao(listaOperacao, tamanho);
+
+
+
+    for (int i = 0; i < transacoesTotal.tamanho; i++)
+    {
+
+    }
+} */
+
 void imprimirListaEscalonamento(ListaEscalonamento *lista)
 {
     for (int i = 0; i < lista->tamanho; i++)

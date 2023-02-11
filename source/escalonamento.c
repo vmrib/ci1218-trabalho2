@@ -4,6 +4,7 @@
 
 #include "operacao.h"
 #include "listaOperacao.h"
+#include "listaTransacao.h"
 
 // Duas arestas x vertice por aresta
 typedef unsigned int PilhaAresta[2][2];
@@ -11,17 +12,22 @@ typedef unsigned int PilhaAresta[2][2];
 static bool adicionarPorConflito(Escalonamento *escalonamento, Transacao *transacao);
 static bool adicionarPorVisao(Escalonamento *escalonamento, Transacao *transacao);
 
+static bool checarSerialidadeConflito(Escalonamento *escalonamento);
+static bool checarSerialidadeVisao(Escalonamento *escalonamento);
+
 static bool checarArestaConflito(Transacao *t1, Transacao *t2);
 
-static ListaOperacao *recriarListaOperacoes(Transacao **transacoes, unsigned int totalTransacoes);
-static void inserirArestasWRVisao(Grafo *grafo, ListaOperacao *operacoes);
-static bool inserirArestasWWVisao(Grafo *grafo, ListaOperacao *operacoes);
-static void inserirArestasWRVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo);
-static bool inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo);
+static ListaOperacao *recriarListaOperacoes(ListaTransacao *transacoes);
+static void inserirArestasWRVisao(Escalonamento *esc, ListaOperacao *operacoes);
+static bool inserirArestasWWVisao(Escalonamento *esc, ListaOperacao *operacoes);
+static void inserirArestasWRVisaoAtributo(Escalonamento *esc, ListaOperacao *operacoes, char atributo);
+static bool inserirArestasWWVisaoAtributo(Escalonamento *esc, ListaOperacao *operacoes, char atributo);
 
-static bool encontrarCombinacaoArestasVisao(Grafo *grafo, PilhaAresta pilha[], unsigned int topo);
+static bool encontrarCombinacaoArestasVisao(Escalonamento *esc, PilhaAresta pilha[], unsigned int topo);
 
 static void ordenarListaOperacoes(ListaOperacao *lista);
+
+static unsigned int idTransacaoParaIdGrafoVisao(Escalonamento *escalonamento, unsigned int idTransacao);
 
 Escalonamento *criarEscalonamento()
 {
@@ -35,6 +41,7 @@ Escalonamento *criarEscalonamento()
 
     escalonamento->transacoesConflito = NULL;
     escalonamento->transacoesVisao = NULL;
+    escalonamento->transacoes = criarListaTransacao();
 
     escalonamento->serializavelConflito = false;
     escalonamento->serializavelVisao = false;
@@ -46,28 +53,44 @@ Escalonamento *criarEscalonamento()
 // Retorna true se a transação foi adicionada com sucesso, false caso contrário.
 bool adicionarTransacao(Escalonamento *escalonamento, Transacao *transacao)
 {
-    escalonamento->serializavelVisao = adicionarPorVisao(escalonamento, transacao);
-    // escalonamento->serializavelVisao = false;
-    escalonamento->serializavelConflito = adicionarPorConflito(escalonamento, transacao);
+    // escalonamento->serializavelVisao = adicionarPorVisao(escalonamento, transacao);
+    // escalonamento->serializavelConflito = adicionarPorConflito(escalonamento, transacao);
 
-    return escalonamento->serializavelConflito || escalonamento->serializavelVisao;
+    // return escalonamento->serializavelConflito || escalonamento->serializavelVisao;
+
+    if (escalonamento->transacoes->tamanho == 0)
+    {
+        adicionarListaTransacao(escalonamento->transacoes, transacao);
+        return true;
+    }
+
+    for (int i = 0; i < escalonamento->transacoes->tamanho; i++)
+    {
+        if (tempoInicio(transacao) < tempoCommit(&escalonamento->transacoes->transacao[i]))
+        {
+            adicionarListaTransacao(escalonamento->transacoes, transacao);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void imprimirEscalonamento(Escalonamento *escalonamento)
 {
-    for (int i = 0; i < escalonamento->grafoVisao->v - 2; i++)
+    for (int i = 0; i < escalonamento->transacoes->tamanho; i++)
     {
-        printf("%d ", escalonamento->transacoesVisao[i]->id);
+        printf("%d ", escalonamento->transacoes->transacao[i].id);
     }
 
-    if (escalonamento->serializavelConflito)
+    if (checarSerialidadeConflito(escalonamento))
         printf("SS");
     else
         printf("NS");
 
     printf(" ");
 
-    if (escalonamento->serializavelVisao)
+    if (checarSerialidadeVisao(escalonamento))
         printf("SV");
     else
         printf("NV");
@@ -81,6 +104,48 @@ void destruirEscalonamento(Escalonamento *escalonamento)
     destruirGrafo(escalonamento->grafoVisao);
     free(escalonamento->transacoesConflito);
     free(escalonamento);
+}
+
+static bool checarSerialidadeConflito(Escalonamento *escalonamento)
+{
+    for (int i = 0; i < escalonamento->transacoes->tamanho; i++)
+        inserirVertice(escalonamento->grafoConflito);
+
+    removerTodasArestas(escalonamento->grafoConflito);
+
+    for (int i = 0; i < escalonamento->grafoConflito->v; i++)
+    {
+        for (int j = 0; j < escalonamento->grafoConflito->v; j++)
+        {
+            if (i == j)
+                continue;
+
+            if (checarArestaConflito(&escalonamento->transacoes->transacao[i], &escalonamento->transacoes->transacao[j]))
+                inserirAresta(escalonamento->grafoConflito, i, j);
+        }
+    }
+
+    return !checarCicloGrafo(escalonamento->grafoConflito);
+}
+
+static bool checarSerialidadeVisao(Escalonamento *escalonamento)
+{
+    for (int i = 0; i < escalonamento->transacoes->tamanho; i++)
+        inserirVertice(escalonamento->grafoVisao);
+
+    removerTodasArestas(escalonamento->grafoVisao);
+
+    ListaOperacao *listaOperacoes = recriarListaOperacoes(escalonamento->transacoes);
+
+    // Possos 1 e 2
+    inserirArestasWRVisao(escalonamento, listaOperacoes);
+
+    // Passo 3
+    bool serializavel = inserirArestasWWVisao(escalonamento, listaOperacoes);
+
+    destruirListaOperacao(listaOperacoes);
+
+    return serializavel;
 }
 
 static bool checarArestaConflito(Transacao *t1, Transacao *t2)
@@ -134,7 +199,7 @@ static bool adicionarPorConflito(Escalonamento *escalonamento, Transacao *transa
     return true;
 }
 
-static bool adicionarPorVisao(Escalonamento *escalonamento, Transacao *transacao)
+/* static bool adicionarPorVisao(Escalonamento *escalonamento, Transacao *transacao)
 {
     inserirVertice(escalonamento->grafoVisao);
     removerTodasArestas(escalonamento->grafoVisao);
@@ -152,18 +217,17 @@ static bool adicionarPorVisao(Escalonamento *escalonamento, Transacao *transacao
     destruirListaOperacao(operacoes);
 
     return serializavel;
-}
+} */
 
-// sus, remover
-static ListaOperacao *recriarListaOperacoes(Transacao **transacoes, unsigned int totalTransacoes)
+static ListaOperacao *recriarListaOperacoes(ListaTransacao *transacoes)
 {
     ListaOperacao *operacoes = criarListaOperacao();
 
-    for (int i = 0; i < totalTransacoes; i++)
+    for (int i = 0; i < transacoes->tamanho; i++)
     {
-        for (int j = 0; j < transacoes[i]->tamanho; j++)
+        for (int j = 0; j < transacoes->transacao[i].tamanho; j++)
         {
-            adicionarListaOperacao(operacoes, &transacoes[i]->listaOperacoes[j]);
+            adicionarListaOperacao(operacoes, &transacoes->transacao[i].listaOperacoes[j]);
         }
     }
 
@@ -173,7 +237,7 @@ static ListaOperacao *recriarListaOperacoes(Transacao **transacoes, unsigned int
 }
 
 // Passo 1 e 2
-static void inserirArestasWRVisao(Grafo *grafo, ListaOperacao *operacoes)
+static void inserirArestasWRVisao(Escalonamento *esc, ListaOperacao *operacoes)
 {
     char atributos[operacoes->tamanho];
     unsigned int totalAtributos = 0;
@@ -201,31 +265,35 @@ static void inserirArestasWRVisao(Grafo *grafo, ListaOperacao *operacoes)
 
     // cria as arestas para cada atributo
     for (int i = 0; i < totalAtributos; i++)
-        inserirArestasWRVisaoAtributo(grafo, operacoes, atributos[i]);
+        inserirArestasWRVisaoAtributo(esc, operacoes, atributos[i]);
 }
 
 // Passo 1 e 2 (considerando soh um atributo)
-static void inserirArestasWRVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo)
+static void inserirArestasWRVisaoAtributo(Escalonamento *esc, ListaOperacao *operacoes, char atributo)
 {
     unsigned int Ti = 0;
     for (int i = 0; i < operacoes->tamanho; i++)
     {
         Operacao *operacaoAtual = &operacoes->listaOperacoes[i];
-        unsigned int Tj = operacaoAtual->idTransacao + 1;
+        unsigned int Tj = operacaoAtual->idTransacao;
 
         if (operacaoAtual->atributo != atributo)
             continue;
 
         if (operacaoAtual->operacao == 'R' && Ti != Tj)
-            inserirAresta(grafo, Ti, Tj);
+            inserirAresta(esc->grafoVisao,
+                          idTransacaoParaIdGrafoVisao(esc, Ti),
+                          idTransacaoParaIdGrafoVisao(esc, Tj));
 
         else if (operacaoAtual->operacao == 'W')
             Ti = Tj;
     }
+
+    inserirAresta(esc->grafoVisao, idTransacaoParaIdGrafoVisao(esc, Ti), 1);
 }
 
 // Passo 3
-static bool inserirArestasWWVisao(Grafo *grafo, ListaOperacao *operacoes)
+static bool inserirArestasWWVisao(Escalonamento *esc, ListaOperacao *operacoes)
 {
     char atributos[operacoes->tamanho];
     unsigned int totalAtributos = 0;
@@ -253,7 +321,7 @@ static bool inserirArestasWWVisao(Grafo *grafo, ListaOperacao *operacoes)
 
     // cria as arestas para cada atributo
     for (int i = 0; i < totalAtributos; i++)
-        if (!inserirArestasWWVisaoAtributo(grafo, operacoes, atributos[i]))
+        if (!inserirArestasWWVisaoAtributo(esc, operacoes, atributos[i]))
             return false;
 
     return true;
@@ -261,17 +329,17 @@ static bool inserirArestasWWVisao(Grafo *grafo, ListaOperacao *operacoes)
 
 // Passo 3 (copnsiderando um atributo)
 static bool
-inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atributo)
+inserirArestasWWVisaoAtributo(Escalonamento *esc, ListaOperacao *operacoes, char atributo)
 {
     PilhaAresta pilha[operacoes->tamanho * 2];
     unsigned int topo = 0;
     unsigned int W1 = 0;
     int k = 0;
 
-    for (int i = 0; i < operacoes->tamanho; i++)
+    for (int i = k; i < operacoes->tamanho; i++)
     {
         Operacao *operacaoAtual = &operacoes->listaOperacoes[i];
-        unsigned int W2 = operacaoAtual->idTransacao + 1;
+        unsigned int W2 = operacaoAtual->idTransacao;
 
         if (operacaoAtual->atributo != atributo)
             continue;
@@ -280,7 +348,7 @@ inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atrib
         {
             for (int j = k; j < i; j++)
             {
-                unsigned int Tx = operacoes->listaOperacoes[j].idTransacao + 1;
+                unsigned int Tx = operacoes->listaOperacoes[j].idTransacao;
 
                 if (operacoes->listaOperacoes[j].atributo != atributo)
                     continue;
@@ -298,9 +366,11 @@ inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atrib
                 }
             }
 
-            for (int j = i; j < operacoes->tamanho; j++)
+            bool encontrouOutroWrite = false;
+
+            for (int j = i + 1; j < operacoes->tamanho; j++)
             {
-                unsigned int Tx = operacoes->listaOperacoes[j].idTransacao + 1;
+                unsigned int Tx = operacoes->listaOperacoes[j].idTransacao;
 
                 if (operacoes->listaOperacoes[j].atributo != atributo)
                     continue;
@@ -319,36 +389,65 @@ inserirArestasWWVisaoAtributo(Grafo *grafo, ListaOperacao *operacoes, char atrib
 
                 else if (operacoes->listaOperacoes[j].operacao == 'W')
                 {
+                    encontrouOutroWrite = true;
                     break;
                 }
             }
 
+            // se nao encontrou outro write, entao W2 eh o ultimo write
+            // considerar a aresta W2 -> Tf
+            if (!encontrouOutroWrite)
+            {
+                pilha[topo][0][0] = W1;
+                pilha[topo][0][1] = W2;
+                pilha[topo][1][0] = 1;
+                pilha[topo][1][1] = W1;
+                topo++;
+            }
+
             W1 = W2;
-            k = i;
+            k = i + 1;
         }
     }
 
-    return encontrarCombinacaoArestasVisao(grafo, pilha, topo);
+    return encontrarCombinacaoArestasVisao(esc, pilha, topo);
 }
 
-static bool encontrarCombinacaoArestasVisao(Grafo *grafo, PilhaAresta pilha[], unsigned int topo)
+static bool encontrarCombinacaoArestasVisao(Escalonamento *esc, PilhaAresta pilha[], unsigned int topo)
 {
 
     if (topo == 0)
-        return checarCicloGrafo(grafo);
+        return !checarCicloGrafo(esc->grafoVisao);
 
     topo--;
 
-    inserirAresta(grafo, pilha[topo][0][0], pilha[topo][0][1]);
+    unsigned int T0 = 0;
+    unsigned int Tf = 1;
 
-    if (!encontrarCombinacaoArestasVisao(grafo, pilha, topo))
+    unsigned int Ti = pilha[topo][0][0];
+    unsigned int Tj = pilha[topo][0][1];
+
+    inserirAresta(esc->grafoVisao,
+                  idTransacaoParaIdGrafoVisao(esc, Ti),
+                  idTransacaoParaIdGrafoVisao(esc, Tj));
+
+    if (Ti == Tf || Tj == T0 || !encontrarCombinacaoArestasVisao(esc, pilha, topo))
     {
-        removerAresta(grafo, pilha[topo][0][0], pilha[topo][0][1]);
-        inserirAresta(grafo, pilha[topo][1][0], pilha[topo][1][1]);
+        removerAresta(esc->grafoVisao,
+                      idTransacaoParaIdGrafoVisao(esc, Ti),
+                      idTransacaoParaIdGrafoVisao(esc, Tj));
 
-        if (!encontrarCombinacaoArestasVisao(grafo, pilha, topo))
+        Ti = pilha[topo][1][0];
+        Tj = pilha[topo][1][1];
+        inserirAresta(esc->grafoVisao,
+                      idTransacaoParaIdGrafoVisao(esc, Ti),
+                      idTransacaoParaIdGrafoVisao(esc, Tj));
+
+        if (Ti == Tf || Tj == T0 || !encontrarCombinacaoArestasVisao(esc, pilha, topo))
         {
-            removerAresta(grafo, pilha[topo][1][0], pilha[topo][1][1]);
+            removerAresta(esc->grafoVisao,
+                          idTransacaoParaIdGrafoVisao(esc, Ti),
+                          idTransacaoParaIdGrafoVisao(esc, Tj));
             return false;
         }
     }
@@ -364,4 +463,16 @@ static int comparar(const void *a, const void *b)
 static void ordenarListaOperacoes(ListaOperacao *lista)
 {
     qsort(lista->listaOperacoes, lista->tamanho, sizeof(Operacao), comparar);
+}
+
+static unsigned int idTransacaoParaIdGrafoVisao(Escalonamento *escalonamento, unsigned int idTransacao)
+{
+    if (idTransacao == 0)
+        return idTransacao;
+
+    for (int i = 0; i < escalonamento->transacoes->tamanho; i++)
+        if (escalonamento->transacoes->transacao[i].id == idTransacao)
+            return i + 2;
+
+    return 0;
 }

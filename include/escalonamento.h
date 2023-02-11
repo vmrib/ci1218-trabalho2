@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "transacao.h"
 #include "grafo.h"
+#include "listaTransacao.h"
 
 typedef struct Escalonamento
 {
@@ -11,6 +12,7 @@ typedef struct Escalonamento
 
     Transacao **transacoesConflito;
     Transacao **transacoesVisao;
+    ListaTransacao *transacoes;
 
     bool serializavelConflito;
     bool serializavelVisao;
